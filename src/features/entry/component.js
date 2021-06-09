@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardBody,
+  CardFooter,
   CardHeader,
   CardText,
 } from "reactstrap";
@@ -337,7 +338,7 @@ const EntryCard = ({
     >
       <CardHeader
         style={{
-          fontSize: "12px",
+          fontSize: "18px",
           textAlign: "center",
           borderTopLeftRadius: "24px",
           borderTopRightRadius: "24px",
@@ -347,7 +348,7 @@ const EntryCard = ({
       >
         <b>CRYPTO SAVINGS APP</b>
         <br />
-        <em>powered by APIS</em>
+        <span style={{fontSize: "12px"}}><em>powered by APIS</em></span>
       </CardHeader>
       <CardBody>
         {

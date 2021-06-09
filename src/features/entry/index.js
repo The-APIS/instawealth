@@ -62,20 +62,20 @@ const Entry = ({
         handleClick={handleClick}
         wallet={selectedAddress}
       />
-        <div
-          onClick={selectedAddress ? () => copyToClipboard(selectedAddress) : noop}
-          style={{
-            fontSize: "12px",
-            textAlign: "center",
-            marginTop: "40px",
-            cursor: "pointer",
-          }}
-        >
-          { selectedAddress
-              ? `${NETWORK_NAMES.eth[networkId.toString()] || "Unknown network"} wallet connected: ${getAddressLabel(selectedAddress)}`
-              : `Waiting for wallet connection...`
-          }
-        </div>
+      <div
+        onClick={selectedAddress ? () => copyToClipboard(selectedAddress) : noop}
+        style={{
+          fontSize: "12px",
+          textAlign: "center",
+          marginTop: "40px",
+          cursor: "pointer",
+        }}
+      >
+        { selectedAddress
+            ? `${NETWORK_NAMES.eth[networkId.toString()] || "Unknown network"} wallet connected: ${getAddressLabel(selectedAddress)}`
+            : `Waiting for wallet connection...`
+        }
+      </div>
     </div>
   );
 };

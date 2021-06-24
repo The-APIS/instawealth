@@ -8,7 +8,7 @@ import {
   CardText,
 } from "reactstrap";
 import { KYC } from "../../config/constants";
-import SDK from '@dapis/sdk/src/compoundSDK';
+import SDK from '@theapis/sdk/src/compoundSDK';
 import {NavContext} from '../../context/NavContext';
 import {SDKContext, SupportedTokensContext, TokenBalanceContext} from '../../context/SDKContext';
 
@@ -21,6 +21,8 @@ const InvestLayout = ()=>{
   const [loader, setloader] = useState(false)
   const [counter, setcounter] = useState(0)
   const [loaderText, setloaderText] = useState("")
+
+  const { route, setRoute } = useContext(NavContext)
 
   async function handleInputChange(event) {
     const target = event.target;
@@ -220,7 +222,7 @@ const HomeLayout = ()=>{
                   background: "#e0e0e0",
                   fontSize: "12px",
                   padding: "2px 5px",
-                }} onClick={ ()=>nav.Provider.value='invest'}
+                }} onClick={ ()=> nav.Provider.value.route = 'invest'}
               >
                 Buy
               </div>
@@ -229,7 +231,7 @@ const HomeLayout = ()=>{
                   background: "#e0e0e0",
                   fontSize: "12px",
                   padding: "2px 5px",
-                }} onClick={ ()=>nav.Provider.value='withdraw'}
+                }} onClick={ ()=> nav.Provider.value.route = 'withdraw'}
               >
                 Sell
               </div>
@@ -266,7 +268,7 @@ const Savings = ({ onClick = noop }) => {
   var [sdk, setsdk] = useState(new SDK());
   const [supportedTokens, setsupportedTokens] = useState([]);
   const [tokenBalance, settokenBalance] = useState([]);
-  const [navValue, setNavValue] = useState('HomeLayout'); 
+  const [route, setRoute] = useState('home'); 
 
   async function fetchSDK() {
     try {
@@ -292,35 +294,33 @@ const Savings = ({ onClick = noop }) => {
   
   useEffect(() => {
     fetchSDK();
-    return () => {
-      
-    }
-  }, [fetchSDK, supportedTokens]);
+  }, [supportedTokens]);
 
   
   return (
     <>
     <div>
       <SDKContext.Provider value={sdk}>
-      <SupportedTokensContext.Provider value={supportedTokens}>
-      <NavContext.Provider value={navValue}>
-      <TokenBalanceContext.Provider value={tokenBalance}>
-      <div>
-        <button onClick={ ()=>setNavValue('invest')}>Invest</button>
-        <button onClick={ ()=>setNavValue('withdraw')}>Withdraw</button>
-        <button onClick={ ()=>setNavValue('home')}>Home</button>
-      </div>
-      <NavContext.Consumer>
-      {value => {if(value==='invest') 
-                return <InvestLayout /> 
-                else if(value==='withdraw') 
-                return <WithdrawLayout/>
-                else
-                return <HomeLayout/>}}
-      </NavContext.Consumer>
-      </TokenBalanceContext.Provider>
-      </NavContext.Provider>
-      </SupportedTokensContext.Provider>
+        <SupportedTokensContext.Provider value={supportedTokens}>
+          <NavContext.Provider value={{ route, setRoute }}>
+            <TokenBalanceContext.Provider value={tokenBalance}>
+              <div>
+                <button onClick={ ()=> setRoute('invest')}>Invest</button>
+                <button onClick={ ()=> setRoute('withdraw')}>Withdraw</button>
+                <button onClick={ ()=> setRoute('home')}>Home</button>
+              </div>
+              <NavContext.Consumer>
+                {({ route }) => {
+                  switch(route) {
+                    case 'invest': return <InvestLayout /> 
+                    case 'withdraw': return <WithdrawLayout/>
+                    default: return <HomeLayout /> 
+                  }
+                }}
+              </NavContext.Consumer>
+            </TokenBalanceContext.Provider>
+          </NavContext.Provider>
+        </SupportedTokensContext.Provider>
       </SDKContext.Provider>
     </div>
     {/****** My Wallet ******/}
@@ -455,7 +455,7 @@ const Savings = ({ onClick = noop }) => {
                   background: "#e0e0e0",
                   fontSize: "12px",
                   padding: "2px 5px",
-                }} onClick={ ()=>setNavValue('invest')}
+                }} onClick={ ()=>setRoute('invest')}
               >
                 Buy
               </div>
@@ -464,7 +464,7 @@ const Savings = ({ onClick = noop }) => {
                   background: "#e0e0e0",
                   fontSize: "12px",
                   padding: "2px 5px",
-                }} onClick={ ()=>setNavValue('withdraw')}
+                }} onClick={ ()=>setRoute('withdraw')}
               >
                 Sell
               </div>

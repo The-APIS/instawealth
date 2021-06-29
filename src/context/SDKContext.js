@@ -12,4 +12,11 @@ const TokenBalanceContext = React.createContext({
   settokenBalance: () => {}
 });
 
-export {SDKContext, SupportedTokensContext, TokenBalanceContext}
+const TokenNameContext = React.createContext(
+  {
+    tokenName:'ETH' ,
+    settokenName: () => {}
+  }
+);
+
+export {SDKContext, SupportedTokensContext, TokenBalanceContext,TokenNameContext}

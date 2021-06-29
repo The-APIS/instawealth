@@ -1304,6 +1304,13 @@
   "resolved" "https://registry.npmjs.org/@csstools/normalize.css/-/normalize.css-10.1.0.tgz"
   "version" "10.1.0"
 
+"@dapis/sdk@file:../../apis-js-sdk":
+  "resolved" "file:../../apis-js-sdk"
+  "version" "0.3.2"
+  dependencies:
+    "loglevel" "~1.7.1"
+    "web3" "~1.3.6"
+
 "@emotion/is-prop-valid@^0.8.8":
   "integrity" "sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA=="
   "resolved" "https://registry.npmjs.org/@emotion/is-prop-valid/-/is-prop-valid-0.8.8.tgz"

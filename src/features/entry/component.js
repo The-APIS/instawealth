@@ -8,21 +8,18 @@ import {
   CardText,
 } from "reactstrap";
 import { KYC } from "../../config/constants";
-import SDK from '@theapis/sdk/src/compoundSDK';
+import SDK from '@dapis/sdk/src/compoundSDK';
 import {NavContext} from '../../context/NavContext';
-import {SDKContext, SupportedTokensContext, TokenBalanceContext} from '../../context/SDKContext';
+import {SDKContext, SupportedTokensContext, TokenBalanceContext,TokenNameContext} from '../../context/SDKContext';
 
 const InvestLayout = ()=>{
 
   const sdk = useContext(SDKContext);
-  const tokens = useContext(SupportedTokensContext);
-  const [tokenName, settokenName] = useState("ETH");
   const [tokenAmount, settokenAmount] = useState(0);
   const [loader, setloader] = useState(false)
   const [counter, setcounter] = useState(0)
-  const [loaderText, setloaderText] = useState("")
-
-  const { route, setRoute } = useContext(NavContext)
+  const {tokenName, settokenName} = useContext(TokenNameContext);
+  const { route, setRoute } = useContext(NavContext);
 
   async function handleInputChange(event) {
     const target = event.target;
@@ -36,10 +33,12 @@ const InvestLayout = ()=>{
     }
   }
 
-  function toggleLoader(){
-    setloader(!loader);
-    setloaderText(loader ? '' : 'Loading...');
+  async function handleSubmitMax(){
+    const maxBalance = await sdk.getBalance(tokenName);
+    settokenAmount(maxBalance/1e18);
   }
+
+
 
   async function handleSubmit(){
     setloader(true);
@@ -57,35 +56,103 @@ const InvestLayout = ()=>{
       console.log(receipt);
       setcounter(counter+1);
       if(counter===3){
-      toggleLoader(); 
-      console.log("counter is 3")}});
+      return;}});
   }
   return(
       <div>
-      <h2>Invest Crypto</h2>
-      <label htmlFor="tokenName">Choose a crypto:</label>
-      <select name="tokenName" id="tokenName" onChange={handleInputChange}>
-        <option value="ETH" selected>ETH</option>
-       {tokens.map((token) => (
-          <option value={token.name} key={token.name}>{token.name}</option>
-        ))}
-      </select><br></br>
-      <label>Amount</label><input type="text" name="tokenInvestAmount" onChange={handleInputChange}></input>
-      <br></br>
-      <button type="button" onClick={handleSubmit}>Invest</button><br/>
-      <label value={loaderText}>{loaderText}</label>
+        
+        <h2>Invest Crypto</h2>
+        <img
+          src={"https://rates.titans.finance/static/images/"+tokenName+".png"}
+          height="18px"
+          style={{
+            marginBottom: "3px",
+            marginRight: "5px",
+          }}
+          alt=""
+        />
+        <br></br>
+        <h3>{tokenName}</h3>
+        <label>Amount</label>
+        <input type="text" name="tokenInvestAmount" onChange={handleInputChange} value={tokenAmount}></input>
+        <button onClick={handleSubmitMax}>Max</button>
+        <br></br>
+        <button type="button" onClick={handleSubmit}>Invest</button><br/>
+        <button onClick={() => setRoute('home')}>Cancel</button><br/>
       </div>
   );
 }
 
 const WithdrawLayout = ()=>{
-  return(<p>withdraw</p>);
+  const sdk = useContext(SDKContext);
+  const [tokenAmount, settokenAmount] = useState(0);
+  const [counter, setcounter] = useState(0)
+  const {tokenName, settokenName} = useContext(TokenNameContext);
+  const { route, setRoute } = useContext(NavContext);
+
+  async function handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    const name = target.name;
+    if(name === "tokenName"){
+      settokenName(value);
+    }
+    else{
+      settokenAmount(value);
+    }
+  }
+
+  async function handleSubmit(){
+    sdk.withdraw(tokenName,(tokenAmount*1e18).toString())
+    .on('error', function(error){ 
+      console.log("error: ")
+      console.log(error.message); })
+    .on('transactionHash', function(transactionHash){ console.log("transaction hash: " +transactionHash); })
+    .on('receipt', function(receipt){
+        console.log("reciept");
+        console.log(receipt); 
+    })
+    .on('confirmation', function(confirmationNumber, receipt){ console.log("confirmed: "+ confirmationNumber);
+        console.log(receipt) });
+  }
+
+  async function handleSubmitMax(){
+    const maxBalance = await sdk.getInvestBalance(tokenName);
+    settokenAmount(maxBalance/1e18);
+  }
+
+  return(
+    <div>
+      <h2>Withdraw Crypto</h2>
+      <img
+        src={"https://rates.titans.finance/static/images/"+tokenName+".png"}
+        height="18px"
+        style={{
+          marginBottom: "3px",
+          marginRight: "5px",
+        }}
+        alt=""
+      />
+      <br></br>
+      <h3>{tokenName}</h3>
+      <label>Amount</label>
+      <input type="text" name="tokenInvestAmount" onChange={handleInputChange} value={tokenAmount}></input>
+      <button onClick={handleSubmitMax}>Max</button>
+      <br></br>
+      <button type="button" onClick={handleSubmit}>Withdraw</button><br/>
+      <button onClick={() => setRoute('home')}>Cancel</button><br/>
+    </div>
+    
+  );
 }
 
 const HomeLayout = ()=>{
   const supportedTokens = useContext(SupportedTokensContext);
   const tokenBalance = useContext(TokenBalanceContext);
+  const { tokenName, settokenName } = useContext(TokenNameContext);
   const nav = useContext(NavContext);
+  const { route, setRoute } = useContext(NavContext);
+  const sdk = useContext(SDKContext);
 
   return(
     <>
@@ -156,9 +223,11 @@ const HomeLayout = ()=>{
 
   
   {
-    supportedTokens.map((token) => 
-      (
-        
+    supportedTokens.map( async (token) => 
+      {
+        let apy = await sdk.getAPY(token.name);
+        console.log("APY for " + token.name+" is"+ apy);
+        return(
           <Card
             style={{
               marginLeft: -15,
@@ -193,7 +262,7 @@ const HomeLayout = ()=>{
                     padding: "2px 5px",
                   }}
                 >
-                  APY: 6.4%
+                  APY: {apy}%
                 </span>
               </div>
               <div>
@@ -222,7 +291,11 @@ const HomeLayout = ()=>{
                   background: "#e0e0e0",
                   fontSize: "12px",
                   padding: "2px 5px",
-                }} onClick={ ()=> nav.Provider.value.route = 'invest'}
+                }} onClick={ ()=> {
+                    settokenName(token.name);
+                    setRoute('invest');
+                    }
+                  }
               >
                 Buy
               </div>
@@ -231,12 +304,14 @@ const HomeLayout = ()=>{
                   background: "#e0e0e0",
                   fontSize: "12px",
                   padding: "2px 5px",
-                }} onClick={ ()=> nav.Provider.value.route = 'withdraw'}
+                }} onClick={ ()=> setRoute('withdraw')}
               >
                 Sell
               </div>
             </CardText>
-          </Card>)
+          </Card>
+          )
+          }
           )
         } 
         </>
@@ -268,7 +343,8 @@ const Savings = ({ onClick = noop }) => {
   var [sdk, setsdk] = useState(new SDK());
   const [supportedTokens, setsupportedTokens] = useState([]);
   const [tokenBalance, settokenBalance] = useState([]);
-  const [route, setRoute] = useState('home'); 
+  const [route, setRoute] = useState('home');
+  const [tokenName, settokenName] = useState('ETH');
 
   async function fetchSDK() {
     try {
@@ -294,7 +370,7 @@ const Savings = ({ onClick = noop }) => {
   
   useEffect(() => {
     fetchSDK();
-  }, [supportedTokens]);
+  }, [fetchSDK,supportedTokens]);
 
   
   return (
@@ -304,176 +380,23 @@ const Savings = ({ onClick = noop }) => {
         <SupportedTokensContext.Provider value={supportedTokens}>
           <NavContext.Provider value={{ route, setRoute }}>
             <TokenBalanceContext.Provider value={tokenBalance}>
-              <div>
-                <button onClick={ ()=> setRoute('invest')}>Invest</button>
-                <button onClick={ ()=> setRoute('withdraw')}>Withdraw</button>
-                <button onClick={ ()=> setRoute('home')}>Home</button>
-              </div>
-              <NavContext.Consumer>
-                {({ route }) => {
-                  switch(route) {
-                    case 'invest': return <InvestLayout /> 
-                    case 'withdraw': return <WithdrawLayout/>
-                    default: return <HomeLayout /> 
-                  }
-                }}
-              </NavContext.Consumer>
+              <TokenNameContext.Provider value={{tokenName, settokenName}}>
+                <NavContext.Consumer>
+                  {({ route }) => {
+                    switch(route) {
+                      case 'invest': return <InvestLayout /> 
+                      case 'withdraw': return <WithdrawLayout/>
+                      default: return <HomeLayout /> 
+                    }
+                  }}
+                </NavContext.Consumer>
+              </TokenNameContext.Provider>
             </TokenBalanceContext.Provider>
           </NavContext.Provider>
         </SupportedTokensContext.Provider>
       </SDKContext.Provider>
     </div>
-    {/****** My Wallet ******/}
-    <CardText
-    style={{
-      fontWeight: "bold",
-      marginTop: "-10px",
-      marginBottom: "5px",
-    }}
-  >
-    My Wallet
-  </CardText>
-  
-  {supportedTokens.map((token) => {
-
-    let Bal = tokenBalance.find((object) => {return object.name === token.name});
-      if(Bal!==undefined){
-        if(Bal.balance!=="0")
-        {
-          return(
-            <Card
-            style={{
-              marginLeft: -15,
-              marginRight: -15,
-              padding: "5px 15px",
-            }}
-            >
-              <CardText
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "14px",
-                }}
-              >
-                <div>
-                  <img
-                    src={"https://rates.titans.finance/static/images/"+token.name+".png"}
-                    height="18px"
-                    style={{
-                      marginBottom: "3px",
-                      marginRight: "5px",
-                    }}
-                    alt=""
-                  />
-                  {token.name}
-                </div>
-                <div><b>{Bal.balance/ 1e18}</b></div>
-              </CardText>
-            </Card>
-          )
-        }
-      }
-      return (<></>)
-    })}
-  
-
-  {/****** My Savings ******/}
-  <CardText
-    style={{
-      fontWeight: "bold",
-      marginTop: "15px",
-      marginBottom: "5px",
-    }}
-  >
-    Savings
-  </CardText>
-
-  
-  {
-    supportedTokens.map((token) => 
-      (
-          <Card
-            style={{
-              marginLeft: -15,
-              marginRight: -15,
-              padding: "5px 15px",
-            }}
-          >
-            <CardText
-              style={{
-                display: "flex",
-                justifyItems: "center",
-                justifyContent: "space-between",
-                fontSize: "14px",
-              }}
-            >
-              <div>
-                <img
-                  src={"https://rates.titans.finance/static/images/"+token.name+".png"}
-                  height="18px"
-                  style={{
-                    marginBottom: "3px",
-                    marginRight: "5px",
-                  }}
-                  alt=""
-                />
-                {token.name}
-                <span
-                  style={{
-                    marginLeft: "5px",
-                    background: "#e0e0e0",
-                    fontSize: "10px",
-                    padding: "2px 5px",
-                  }}
-                >
-                  APY: 6.4%
-                </span>
-              </div>
-              <div>
-                <b>100.14</b>
-                {" "}
-                <span
-                  style={{
-                    fontSize: "12px",
-                    color: "#23A632",
-                  }}
-                >
-                  +2.13
-                </span>
-              </div>
-            </CardText>
-            <CardText
-              style={{
-                marginTop: -15,
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
-            >
-              <div
-                style={{
-                  marginRight: "10px",
-                  background: "#e0e0e0",
-                  fontSize: "12px",
-                  padding: "2px 5px",
-                }} onClick={ ()=>setRoute('invest')}
-              >
-                Buy
-              </div>
-              <div
-                style={{
-                  background: "#e0e0e0",
-                  fontSize: "12px",
-                  padding: "2px 5px",
-                }} onClick={ ()=>setRoute('withdraw')}
-              >
-                Sell
-              </div>
-            </CardText>
-          </Card>)
-      
-    )
-  }
-
+    
   
 </>
 );

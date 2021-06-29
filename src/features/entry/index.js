@@ -33,8 +33,24 @@ const Entry = ({
   console.log("zzz yieldsEarned:", yieldsEarned);
   console.log("zzz APYs:", APYs);
 
-  // Connect SDK
+
   useEffect(() => {
+    // Connect Web3
+    if (window && window.ethereum) {
+      window.ethereum.on("accountsChanged", (account) => {
+        console.log("accountsChanged: ", account);
+        setCount(count + 1);
+      });
+    }
+    if (hasEthereum && !networkId) {
+      // Network ID not retrieved yet, wait a bit then try again
+      setTimeout(() => {
+        console.log("Wait for networkId to become available...");
+        setCount(count + 1);
+      }, 1000);
+    }
+
+    // Connect SDK
     const getTokens = async () => {
       try {
         const sdk = new SDK();
@@ -71,24 +87,7 @@ const Entry = ({
       }
     };
     getTokens();
-  }, []);
 
-
-  // Connect Web3
-  useEffect(() => {
-    if (window && window.ethereum) {
-      window.ethereum.on("accountsChanged", (account) => {
-        console.log("accountsChanged: ", account);
-        setCount(count + 1);
-      });
-    }
-    if (hasEthereum && !networkId) {
-      // Network ID not retrieved yet, wait a bit then try again
-      setTimeout(() => {
-        console.log("Wait for networkId to become available...");
-        setCount(count + 1);
-      }, 1000);
-    }
   }, [count, networkId, hasEthereum, selectedAddress]);
 
   let onClick = noop;

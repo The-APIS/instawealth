@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import SDK from "@dapis/sdk/src/compoundSDK";
 import { get, noop, cloneDeep } from "lodash";
+import {NavContext} from '../../context/NavContext';
+import {SDKContext, TokenNameContext} from '../../context/SDKContext';
 // import { useSelector, useDispatch } from 'react-redux';
 // import { Card, Button, CardTitle, CardText } from 'reactstrap';
 
-import EntryCard from "./component";
+import {EntryCard, InvestLayout, WithdrawLayout} from "./component";
 import { NETWORK_NAMES } from "../../config/constants";
 import {
   copyToClipboard,
@@ -27,6 +29,12 @@ const Entry = ({
   const [yieldBalances, setYieldBalances] = useState({});
   const [yieldsEarned, setYieldsEarned] = useState({});
   const [APYs, setAPYs] = useState({});
+
+  //SDK, Nav and TokenName for invest and Withdraw
+  const [sdk, setsdk] = useState(new SDK());
+  const [route, setRoute] = useState('home');
+  const [tokenName, settokenName] = useState('ETH');
+
   console.log("zzz tokens:", tokens);
   console.log("zzz balances:", balances);
   console.log("zzz yieldBalances:", yieldBalances);
@@ -53,11 +61,9 @@ const Entry = ({
     // Connect SDK
     const getTokens = async () => {
       try {
-        const sdk = new SDK();
         await sdk.init();
         const supportedTokens = sdk.getSupportedTokens();
         console.log("zzzz supportedTokens:", supportedTokens);
-
         // get balances
         const allBalances = {};
         const allYieldBalances = {};
@@ -65,9 +71,13 @@ const Entry = ({
         const allYieldsEarned = {};
         const getBalance = async (token) => {
           const name = token.name;
+          const decimal = await sdk.getDecimals(name);
           console.log("zzz getting balance for:", name);
-          allBalances[name] = await sdk.getBalance(name);
+          allBalances[name] = await sdk.getBalance(name) / 10**decimal;
           allAPYs[name] = await sdk.getAPY(name);
+          console.log("balance of " + name + " is "+ allBalances[name]);
+          // All cTokens have 8 decimals
+          allYieldBalances[name] = (await sdk.getInvestBalance(name)) / (10**8);
           // TODO: add yield token balances
           // TODO: add yield earned
         }
@@ -88,7 +98,7 @@ const Entry = ({
     };
     getTokens();
 
-  }, [count, networkId, hasEthereum, selectedAddress]);
+  }, [count, networkId, hasEthereum, selectedAddress, sdk]);
 
   let onClick = noop;
   let buttonLabel = "Checking connection...";
@@ -109,16 +119,38 @@ const Entry = ({
 
   return (
     <div>
-      <EntryCard
-        buttonLabel={buttonLabel}
-        handleClick={handleClick}
-        wallet={selectedAddress}
-        tokens={tokens}
-        balances={balances}
-        APYs={APYs}
-        yieldBalances={yieldBalances}
-        yieldsEarned={yieldsEarned}
-      />
+      <div>
+        <SDKContext.Provider value={sdk}>
+          <NavContext.Provider value={{ route, setRoute }}>
+              <TokenNameContext.Provider value={{tokenName, settokenName}}>
+                <NavContext.Consumer>
+                  {({ route }) => {
+                    switch(route) {
+                      case 'invest': 
+                        return <InvestLayout 
+
+                        /> 
+                      case 'withdraw': 
+                        return <WithdrawLayout
+                        />
+                      default: 
+                      return <EntryCard
+                        buttonLabel={buttonLabel}
+                        handleClick={handleClick}
+                        wallet={selectedAddress}
+                        tokens={tokens}
+                        balances={balances}
+                        APYs={APYs}
+                        yieldBalances={yieldBalances}
+                        yieldsEarned={yieldsEarned}
+                      /> 
+                    }
+                  }}
+                </NavContext.Consumer>
+              </TokenNameContext.Provider>
+          </NavContext.Provider>
+        </SDKContext.Provider>
+      </div>
       <div
         onClick={selectedAddress ? () => copyToClipboard(selectedAddress) : noop}
         style={{

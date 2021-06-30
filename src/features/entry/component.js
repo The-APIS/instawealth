@@ -650,4 +650,12 @@ const EntryCard = ({
   );
 };
 
-export default EntryCard;
+const InvestLayout = () => {
+  
+}
+
+const WithdrawLayout = () => {
+  
+}
+
+export{EntryCard, InvestLayout, WithdrawLayout};

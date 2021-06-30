@@ -1,4 +1,5 @@
 import React from "react";
+import {useContext, useState} from "react";
 import { noop } from "lodash";
 import {
   Button,
@@ -8,8 +9,8 @@ import {
   CardText,
 } from "reactstrap";
 // import SDK from '@dapis/sdk/src/compoundSDK';
-// import {NavContext} from '../../context/NavContext';
-// import {SDKContext, SupportedTokensContext, TokenBalanceContext,TokenNameContext} from '../../context/SDKContext';
+import {NavContext} from '../../context/NavContext';
+import {SDKContext, TokenNameContext} from '../../context/SDKContext';
 
 // const InvestLayout = ()=>{
 
@@ -394,6 +395,9 @@ const SavingsRows = ({
   yieldBalances = {},
   yieldsEarned = {},
 }) => {
+
+  const {setRoute} = useContext(NavContext);
+  const {settokenName} = useContext(TokenNameContext);
   // TODO: should use actual cToken balances here
   const Rows = tokens.map(token => {
     const { name } = token;
@@ -401,6 +405,15 @@ const SavingsRows = ({
     const balance = yieldBalances[name];
     const earned = yieldsEarned[name];
     const defaultValue = "0";
+    const handleBuy = () =>{
+      settokenName(name);
+      setRoute('invest');
+    }
+    const handleSell = () =>{
+      settokenName(name);
+      setRoute('withdraw');
+    }
+    
     return(
       <Card
         style={{
@@ -467,7 +480,7 @@ const SavingsRows = ({
               fontSize: "12px",
               padding: "2px 5px",
             }}
-            onClick={noop}
+            onClick={handleBuy}
           >
             Buy
           </div>
@@ -477,7 +490,7 @@ const SavingsRows = ({
               fontSize: "12px",
               padding: "2px 5px",
             }}
-            onClick={noop}
+            onClick={handleSell}
           >
             Sell
           </div>
@@ -651,11 +664,174 @@ const EntryCard = ({
 };
 
 const InvestLayout = () => {
-  
+  const sdk = useContext(SDKContext);
+  const {tokenName} = useContext(TokenNameContext);
+  const {setRoute } = useContext(NavContext);
+  const [tokenAmount, settokenAmount] = useState(0);
+
+  async function handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    settokenAmount(value);
+  }
+  async function handleSubmitMax(){
+    const maxBalance = await sdk.getBalance(tokenName);
+    console.log("maxBalance :" + maxBalance );
+    const decimals = await sdk.getDecimals(tokenName);
+    settokenAmount(Number(maxBalance/(10**decimals)).toFixed(10));
+  }
+  async function handleSubmit(){
+    sdk.invest(tokenName,(tokenAmount*1e18).toString())
+      .on('error', function(error){ 
+        console.log("error: ")
+        console.log(error.message); })
+      .on('transactionHash', function(transactionHash){console.log("transaction hash: " +transactionHash); })
+      .on('receipt', function(receipt){
+          console.log("reciept");
+          console.log(receipt); 
+      })
+      .on('confirmation', function(confirmationNumber, receipt){ 
+        if(confirmationNumber<3){
+          console.log("confirmed: "+ confirmationNumber);
+          console.log(receipt);
+        }
+      });
+  }
+
+  return(
+    <Card
+      style={{
+        minWidth: "320px",
+        minHeight: "480px",
+        borderRadius: "24px",
+        filter: "drop-shadow(4px 8px 4px #ddd)",
+        background: "#fafafa"
+      }}
+    >
+      <CardHeader
+        style={{
+          fontSize: "18px",
+          textAlign: "center",
+          borderTopLeftRadius: "24px",
+          borderTopRightRadius: "24px",
+          background: "linear-gradient(to right, #4482D0, #0E4B98)",
+          color: "white",
+        }}
+      >
+        <b>CRYPTO SAVINGS APP</b>
+        <br />
+        <span style={{fontSize: "12px"}}><em>powered by APIS</em></span>
+      </CardHeader>
+      <CardBody>
+        <div>
+          <h2>Invest Crypto</h2>
+          <img
+            src={"https://rates.titans.finance/static/images/"+tokenName+".png"}
+            height="18px"
+            style={{
+              marginBottom: "3px",
+              marginRight: "5px",
+            }}
+            alt=""
+          />
+          <br/>
+          <h3>{tokenName}</h3>
+          <label>Amount</label>
+          <input type="text" name="tokenInvestAmount" onChange={handleInputChange} value={tokenAmount}></input>
+          <button onClick={handleSubmitMax}>Max</button>
+          <br/>
+          <button type="button" onClick={handleSubmit}>Invest</button><br/>
+          <button onClick={() => setRoute('home')}>Cancel</button><br/>
+        </div>
+      </CardBody>
+    </Card>
+  );
 }
 
 const WithdrawLayout = () => {
+  const sdk = useContext(SDKContext);
+  const {tokenName} = useContext(TokenNameContext);
+  const {setRoute } = useContext(NavContext);
+  const [tokenAmount, settokenAmount] = useState(0);
   
+
+  async function handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    settokenAmount(value);
+  }
+  async function handleSubmitMax(){
+    const decimals = await sdk.getDecimals(tokenName);
+    const maxBalance = await sdk.getInvestBalance(tokenName);
+    console.log("maxBalance :" + maxBalance );
+    settokenAmount(Number(maxBalance/(10**decimals)).toFixed(10));
+  }
+  async function handleSubmit(){
+    const decimals = await sdk.getDecimals(tokenName);
+    sdk.withdraw(tokenName,(tokenAmount*(10**decimals)).toString())
+      .on('error', function(error){ 
+        console.log("error: ")
+        console.log(error.message); })
+      .on('transactionHash', function(transactionHash){console.log("transaction hash: " +transactionHash); })
+      .on('receipt', function(receipt){
+          console.log("reciept");
+          console.log(receipt); 
+      })
+      .on('confirmation', function(confirmationNumber, receipt){ 
+        if(confirmationNumber<3){
+          console.log("confirmed: "+ confirmationNumber);
+          console.log(receipt);
+        }
+      });
+  }
+  return(
+    <Card
+      style={{
+        minWidth: "320px",
+        minHeight: "480px",
+        borderRadius: "24px",
+        filter: "drop-shadow(4px 8px 4px #ddd)",
+        background: "#fafafa"
+      }}
+    >
+      <CardHeader
+        style={{
+          fontSize: "18px",
+          textAlign: "center",
+          borderTopLeftRadius: "24px",
+          borderTopRightRadius: "24px",
+          background: "linear-gradient(to right, #4482D0, #0E4B98)",
+          color: "white",
+        }}
+      >
+        <b>CRYPTO SAVINGS APP</b>
+        <br />
+        <span style={{fontSize: "12px"}}><em>powered by APIS</em></span>
+      </CardHeader>
+      <CardBody>
+        <div>
+          <h2>Withdraw Crypto</h2>
+          <img
+            src={"https://rates.titans.finance/static/images/"+tokenName+".png"}
+            height="18px"
+            style={{
+              marginBottom: "3px",
+              marginRight: "5px",
+            }}
+            alt=""
+          />
+          <br/>
+          <h3>{tokenName}</h3>
+          <label>Amount</label>
+          <input type="text" name="tokenInvestAmount" onChange={handleInputChange} value={tokenAmount}></input>
+          <button onClick={handleSubmitMax}>Max</button>
+          <br/>
+          <button type="button" onClick={handleSubmit}>Withdraw</button><br/>
+          <button onClick={() => setRoute('home')}>Cancel</button><br/>
+        </div>
+      </CardBody>
+    </Card>
+  );
 }
 
 export{EntryCard, InvestLayout, WithdrawLayout};

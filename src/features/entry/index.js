@@ -31,7 +31,7 @@ const Entry = ({
   const [APYs, setAPYs] = useState({});
 
   //SDK, Nav and TokenName for invest and Withdraw
-  const [sdk, setsdk] = useState(new SDK());
+  const [sdk] = useState(new SDK());
   const [route, setRoute] = useState('home');
   const [tokenName, settokenName] = useState('ETH');
 

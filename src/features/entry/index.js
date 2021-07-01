@@ -3,8 +3,6 @@ import SDK from "@dapis/sdk/src/compoundSDK";
 import { get, noop, cloneDeep } from "lodash";
 import {NavContext} from '../../context/NavContext';
 import {SDKContext, TokenNameContext} from '../../context/SDKContext';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { Card, Button, CardTitle, CardText } from 'reactstrap';
 
 import {EntryCard, InvestLayout, WithdrawLayout} from "./component";
 import { NETWORK_NAMES } from "../../config/constants";

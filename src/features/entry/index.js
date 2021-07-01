@@ -59,7 +59,7 @@ const Entry = ({
     // Connect SDK
     const getTokens = async () => {
       try {
-        await sdk.init();
+        await sdk.init("ifhqepfkdscoihfdeqr654erg");
         const supportedTokens = sdk.getSupportedTokens();
         console.log("zzzz supportedTokens:", supportedTokens);
         // get balances
@@ -75,7 +75,7 @@ const Entry = ({
           allAPYs[name] = await sdk.getAPY(name);
           console.log("balance of " + name + " is "+ allBalances[name]);
           // All cTokens have 8 decimals
-          allYieldBalances[name] = (await sdk.getInvestBalance(name)) / (10**8);
+          allYieldBalances[name] = (await sdk.getInvestBalance(name)) / (10**decimal);
           // TODO: add yield token balances
           // TODO: add yield earned
         }

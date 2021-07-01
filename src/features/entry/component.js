@@ -95,7 +95,7 @@ const SavingsRows = ({
   const Rows = tokens.map(token => {
     const { name } = token;
     const apy = Number(APYs[name]).toFixed(1);
-    const balance = yieldBalances[name];
+    const balance = Number(yieldBalances[name]).toFixed(10);
     const earned = yieldsEarned[name];
     const defaultValue = "0";
     const handleBuy = () =>{
@@ -303,13 +303,19 @@ const InvestLayout = () => {
     settokenAmount(value);
   }
   async function handleSubmitMax(){
-    const maxBalance = await sdk.getBalance(tokenName);
-    console.log("maxBalance :" + maxBalance );
-    const decimals = await sdk.getDecimals(tokenName);
-    settokenAmount(Number(maxBalance/(10**decimals)).toFixed(10));
+    try{
+      const maxBalance = await sdk.getBalance(tokenName);
+      console.log("maxBalance :" + maxBalance );
+      const decimals = await sdk.getDecimals(tokenName);
+      settokenAmount(Number(maxBalance/(10**decimals)).toFixed(10));
+    }
+    catch(error){
+      console.error("Failed to retrieve max balance:", error);
+    }
   }
   async function handleSubmit(){
-    sdk.invest(tokenName,(tokenAmount*1e18).toString())
+    try{
+      sdk.invest(tokenName,(tokenAmount*1e18).toString())
       .on('error', function(error){ 
         console.log("error: ")
         console.log(error.message); })
@@ -324,6 +330,11 @@ const InvestLayout = () => {
           console.log(receipt);
         }
       });
+    }
+    catch(error){
+      console.error("Failed to invest: ", error);
+    }
+    
   }
 
   return(
@@ -389,28 +400,40 @@ const WithdrawLayout = () => {
     settokenAmount(value);
   }
   async function handleSubmitMax(){
-    const decimals = await sdk.getDecimals(tokenName);
-    const maxBalance = await sdk.getInvestBalance(tokenName);
-    console.log("maxBalance :" + maxBalance );
-    settokenAmount(Number(maxBalance/(10**decimals)).toFixed(10));
+    try{
+      const decimals = await sdk.getDecimals(tokenName);
+      const maxBalance = await sdk.getInvestBalance(tokenName);
+      console.log("maxBalance :" + maxBalance );
+      settokenAmount(Number(maxBalance/(10**decimals)).toFixed(10));
+    }
+    catch(error){
+      console.error("Failed to retrieve max balance:", error);
+    }
+    
   }
   async function handleSubmit(){
-    const decimals = await sdk.getDecimals(tokenName);
-    sdk.withdraw(tokenName,(tokenAmount*(10**decimals)).toString())
-      .on('error', function(error){ 
-        console.log("error: ")
-        console.log(error.message); })
-      .on('transactionHash', function(transactionHash){console.log("transaction hash: " +transactionHash); })
-      .on('receipt', function(receipt){
-          console.log("reciept");
-          console.log(receipt); 
-      })
-      .on('confirmation', function(confirmationNumber, receipt){ 
-        if(confirmationNumber<3){
-          console.log("confirmed: "+ confirmationNumber);
-          console.log(receipt);
-        }
-      });
+    try{
+      const decimals = await sdk.getDecimals(tokenName);
+      sdk.withdraw(tokenName,(tokenAmount*(10**decimals)).toString())
+        .on('error', function(error){ 
+          console.log("error: ")
+          console.log(error.message); })
+        .on('transactionHash', function(transactionHash){console.log("transaction hash: " +transactionHash); })
+        .on('receipt', function(receipt){
+            console.log("reciept");
+            console.log(receipt); 
+        })
+        .on('confirmation', function(confirmationNumber, receipt){ 
+          if(confirmationNumber<3){
+            console.log("confirmed: "+ confirmationNumber);
+            console.log(receipt);
+          }
+        });
+    }
+    catch(error){
+      console.error("Failed to withdraw:", error);
+    }
+    
   }
   return(
     <Card

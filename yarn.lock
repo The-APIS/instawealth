@@ -1304,13 +1304,6 @@
   "resolved" "https://registry.npmjs.org/@csstools/normalize.css/-/normalize.css-10.1.0.tgz"
   "version" "10.1.0"
 
-"@dapis/sdk@file:../../apis-js-sdk":
-  "resolved" "file:../../apis-js-sdk"
-  "version" "0.3.2"
-  dependencies:
-    "loglevel" "~1.7.1"
-    "web3" "~1.3.6"
-
 "@emotion/is-prop-valid@^0.8.8":
   "integrity" "sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA=="
   "resolved" "https://registry.npmjs.org/@emotion/is-prop-valid/-/is-prop-valid-0.8.8.tgz"
@@ -2485,9 +2478,8 @@
   "resolved" "https://registry.npmjs.org/@testing-library/user-event/-/user-event-7.2.1.tgz"
   "version" "7.2.1"
 
-"@theapis/sdk@^0.3.2":
-  "integrity" "sha512-JP/DzqI2qniIXmdKqf1AxFBPOt0n4gLSKClSDmRRdCgTUy1lR/dvd8mwtng74YlW4fiIEzULHLith2F3LkKESQ=="
-  "resolved" "https://registry.npmjs.org/@theapis/sdk/-/sdk-0.3.2.tgz"
+"@theapis/sdk@file:../apis-js-sdk":
+  "resolved" "file:../apis-js-sdk"
   "version" "0.3.2"
   dependencies:
     "loglevel" "~1.7.1"
@@ -9110,7 +9102,7 @@
   dependencies:
     "chalk" "^4.0.0"
 
-"loglevel@^1.6.8", "loglevel@~1.7.1":
+"loglevel@^1.6.8":
   "integrity" "sha512-Hesni4s5UkWkwCGJMQGAh71PaLUmKFM60dHvq0zi/vDhhrzuk+4GgNbTXJ12YYQJn6ZKBDNIjYcuQGKudvqrIw=="
   "resolved" "https://registry.npmjs.org/loglevel/-/loglevel-1.7.1.tgz"
   "version" "1.7.1"
@@ -14379,7 +14371,7 @@
     "underscore" "1.12.1"
     "utf8" "3.0.0"
 
-"web3@^1.3.0", "web3@~1.3.6":
+"web3@^1.3.0":
   "integrity" "sha512-jEpPhnL6GDteifdVh7ulzlPrtVQeA30V9vnki9liYlUvLV82ZM7BNOQJiuzlDePuE+jZETZSP/0G/JlUVt6pOA=="
   "resolved" "https://registry.npmjs.org/web3/-/web3-1.3.6.tgz"
   "version" "1.3.6"

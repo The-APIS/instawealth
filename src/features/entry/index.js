@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SDK from "@dapis/sdk/src/compoundSDK";
+import SDK from "@theapis/sdk/src/compoundSDK";
 import { get, noop, cloneDeep } from "lodash";
 import {NavContext} from '../../context/NavContext';
 import {SDKContext, TokenNameContext} from '../../context/SDKContext';
@@ -68,6 +68,7 @@ const Entry = ({
         const allAPYs = {};
         const allYieldsEarned = {};
         const getBalance = async (token) => {
+          console.log('sdk', sdk)
           const name = token.name;
           const decimal = await sdk.getDecimals(name);
           console.log("zzz getting balance for:", name);

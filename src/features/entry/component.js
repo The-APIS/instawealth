@@ -225,7 +225,14 @@ const Savings = ({
         yieldBalances={yieldBalances}
         yieldsEarned={yieldsEarned}
       />
-      <a href="https://sandboxcheckout.rapyd.net/?token=checkout_f11b8de1d86c9c4a4965d2964dd203bf" target="_blank" rel="noreferrer"><Button>Buy Crypto</Button></a>
+      <a 
+        href="https://sandboxcheckout.rapyd.net?token=checkout_56b00be93bde16673931d571e65d835c" 
+        target="_blank" rel="noreferrer">
+        <Button style={{
+          marginTop: "10px",
+          marginLeft: "80px",
+        }} >Buy Crypto</Button>
+      </a>
     </>
   );
 };
@@ -261,7 +268,7 @@ const EntryCard = ({
           color: "white",
         }}
       >
-        <b>CRYPTO SAVINGS APP</b>
+        <b>Rapyd Savings APP</b>
         <br />
         <span style={{fontSize: "12px"}}><em>powered by APIS</em></span>
       </CardHeader>
@@ -351,7 +358,7 @@ const InvestLayout = () => {
           color: "white",
         }}
       >
-        <b>CRYPTO SAVINGS APP</b>
+        <b>Rapyd Savings APP</b>
         <br />
         <span style={{fontSize: "12px"}}><em>powered by APIS</em></span>
       </CardHeader>
@@ -449,7 +456,7 @@ const WithdrawLayout = () => {
           color: "white",
         }}
       >
-        <b>CRYPTO SAVINGS APP</b>
+        <b>Rapyd Savings APP</b>
         <br />
         <span style={{fontSize: "12px"}}><em>powered by APIS</em></span>
       </CardHeader>
@@ -471,8 +478,8 @@ const WithdrawLayout = () => {
           <input type="text" name="tokenInvestAmount" onChange={handleInputChange} value={tokenAmount}></input>
           <button onClick={handleSubmitMax}>Max</button>
           <br/>
-          <button type="button" onClick={handleSubmit}>Withdraw</button><br/>
-          <button onClick={() => setRoute('home')}>Cancel</button><br/>
+          <button type="button" onClick={handleSubmit} style={{ marginTop: "3px", marginLeft: "100px", }}>Withdraw</button><br/>
+          <button onClick={() => setRoute('home')} style={{ marginTop: "5px", marginLeft: "105px", }}>Cancel</button><br/>
         </div>
       </CardBody>
     </Card>

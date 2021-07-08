@@ -20,11 +20,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../build')));
 app.use(express.static(path.join(__dirname, '../static')));
 
+
+app.use('/api/webhooks', webhooksRouter);
+
 app.get('*', function(req, res, next) {
   return res.sendFile(path.resolve(__dirname, '../build/index.html'))
 });
 
-app.use('/api/webhooks', webhooksRouter);
 
 
 // catch 404 and forward to error handler

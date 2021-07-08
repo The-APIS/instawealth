@@ -96,7 +96,6 @@ const SavingsRows = ({
     const { name } = token;
     const apy = Number(APYs[name]).toFixed(1);
     const balance = Number(yieldBalances[name]).toFixed(10);
-    const earned = yieldsEarned[name];
     const defaultValue = "0";
     const handleBuy = () =>{
       settokenName(name);
@@ -149,14 +148,7 @@ const SavingsRows = ({
           <div>
             <b>{balance || defaultValue}</b>
             {" "}
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#23A632",
-              }}
-            >
-              {earned || defaultValue}
-            </span>
+            
           </div>
         </CardText>
         <CardText
@@ -233,6 +225,7 @@ const Savings = ({
         yieldBalances={yieldBalances}
         yieldsEarned={yieldsEarned}
       />
+      <a href="https://sandboxcheckout.rapyd.net/?token=checkout_f11b8de1d86c9c4a4965d2964dd203bf" target="_blank" rel="noreferrer"><Button>Buy Crypto</Button></a>
     </>
   );
 };
@@ -288,6 +281,7 @@ const EntryCard = ({
         }
       </CardBody>
     </Card>
+    
   );
 };
 
